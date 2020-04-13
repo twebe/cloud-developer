@@ -9,21 +9,26 @@ const groupsTable = process.env.GROUPS_TABLE
 exports.handler = async (event) => {
   console.log('Processing event: ', event)
 
-  let nextKey // Next key to continue scan operation if necessary
-  let limit // Maximum number of elements to return
+  // Read and parse "limit" and "nextKey" parameters from query parameters
+   let nextKey // Next key to continue scan operation if necessary
+   let limit // Maximum number of elements to return
+
+  // Return 400 error if parameters are invalid
   try {
-    // Parse query parameters
-    nextKey = parseNextKeyParameter(event)
-    limit = parseLimitParameter(event) || 20
+    const nextKeyStr = getQueryParameter(event, 'nextKey') // Next key to continue scan operation if necessary
+    limit = getQueryParameter(event, 'limit') // Maximum number of elements to return
+    if (nextKeyStr != undefined) {
+     nextKey = JSON.parse(decodeURIComponent(nextKeyStr))
+    }
   } catch (e) {
-    console.log('Failed to parse query parameters: ', e.message)
+    console.log('Could not parse input parameters: ', e.message)
     return {
       statusCode: 400,
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
       body: JSON.stringify({
-        error: 'Invalid parameters'
+        error: 'Could not parse input parameters!'
       })
     }
   }
@@ -31,6 +36,7 @@ exports.handler = async (event) => {
   // Scan operation parameters
   const scanParams = {
     TableName: groupsTable,
+    // Set correct pagination parameters
     Limit: limit,
     ExclusiveStartKey: nextKey
   }
@@ -54,44 +60,6 @@ exports.handler = async (event) => {
       nextKey: encodeNextKey(result.LastEvaluatedKey)
     })
   }
-}
-
-/**
- * Get value of the limit parameter.
- *
- * @param {Object} event HTTP event passed to a Lambda function
- *
- * @returns {number} parsed "limit" parameter
- */
-function parseLimitParameter(event) {
-  const limitStr = getQueryParameter(event, 'limit')
-  if (!limitStr) {
-    return undefined
-  }
-
-  const limit = parseInt(limitStr, 10)
-  if (limit <= 0) {
-    throw new Error('Limit should be positive')
-  }
-
-  return limit
-}
-
-/**
- * Get value of the limit parameter.
- *
- * @param {Object} event HTTP event passed to a Lambda function
- *
- * @returns {Object} parsed "nextKey" parameter
- */
-function parseNextKeyParameter(event) {
-  const nextKeyStr = getQueryParameter(event, 'nextKey')
-  if (!nextKeyStr) {
-    return undefined
-  }
-
-  const uriDecoded = decodeURIComponent(nextKeyStr)
-  return JSON.parse(uriDecoded)
 }
 
 /**
