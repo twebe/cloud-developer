@@ -1,7 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { createLogger } from '../utils/logger'
-import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { TodoUpdate } from '../models/TodoUpdate'
 
 const logger = createLogger('auth')
 
@@ -38,9 +38,9 @@ export class TodoAccess {
 
   async updateTodo(
     todoId: string,
-    updateTodoRequest: UpdateTodoRequest, 
+    todoUpdate: TodoUpdate, 
     userId: string) {
-    logger.info('Updating todo', { todoId, updateTodoRequest, userId })
+    logger.info('Updating todo', { todoId, todoUpdate, userId })
     await this.dynamoDBClient.update({
       TableName: this.todosTable,
       Key: {
@@ -50,9 +50,9 @@ export class TodoAccess {
       UpdateExpression: "set #name = :name, dueDate = :dueDate, done = :done",
       ExpressionAttributeNames: {"#name": "name"},
       ExpressionAttributeValues: {
-        ":name": updateTodoRequest.name,
-        ":dueDate": updateTodoRequest.dueDate,
-        ":done": updateTodoRequest.done
+        ":name": todoUpdate.name,
+        ":dueDate": todoUpdate.dueDate,
+        ":done": todoUpdate.done
       }
     }).promise();
   }

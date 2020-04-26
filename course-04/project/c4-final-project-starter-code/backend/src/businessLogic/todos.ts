@@ -5,6 +5,7 @@ import { TodoItem } from '../models/TodoItem'
 import { parseUserId } from '../auth/utils'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { TodoUpdate } from '../models/TodoUpdate'
 
 const todosAccess = new TodoAccess()
 
@@ -34,5 +35,10 @@ export async function updateTodo(
     updateTodoRequest: UpdateTodoRequest,
     jwtToken: string) {
   const userId = parseUserId(jwtToken)
-  await todosAccess.updateTodo(todoId, updateTodoRequest, userId)
+  const todoUpdate: TodoUpdate = {
+    name: updateTodoRequest.name,
+    dueDate: updateTodoRequest.dueDate,
+    done: updateTodoRequest.done
+  }
+  await todosAccess.updateTodo(todoId, todoUpdate, userId)
 }
