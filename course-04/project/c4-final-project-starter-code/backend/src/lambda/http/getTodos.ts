@@ -7,17 +7,17 @@ import { getTodos } from '../../businessLogic/todos'
 
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Get all TODO items for a current user
-  const authHeader = event.headers.Authorization;
-  const split = authHeader.split(' ')
+  const authorization = event.headers.Authorization;
+  const split = authorization.split(' ')
   const jwtToken = split[1]
 
   // Get the list of TODO items for the user
-  const list = await getTodos(jwtToken);
+  const todoList = await getTodos(jwtToken);
 
   return {
       statusCode: 200,
       body: JSON.stringify({
-          items: list
+          items: todoList
       })
   };
 })

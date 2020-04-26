@@ -25,4 +25,13 @@ export class TodoAccess {
     const items = result.Items
     return items as TodoItem[]
   }
+
+  async createTodo(item: TodoItem): Promise<TodoItem> {
+    await this.dynamoDBClient.put({
+      TableName: this.todosTable,
+      Item: item
+    }).promise()
+
+    return item
+  }
 }

@@ -44,6 +44,13 @@ functions:
       - http:
           method: post
           path: todos
+          corst: true
+          authorizer: Auth
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
   # TODO: Configure this function
   UpdateTodo:
@@ -52,6 +59,8 @@ functions:
       - http:
           method: patch
           path: todos/{todoId}
+          corst: true
+          authorizer: Auth
 
   # TODO: Configure this function
   DeleteTodo:
@@ -60,6 +69,8 @@ functions:
       - http:
           method: delete
           path: todos/{todoId}
+          corst: true
+          authorizer: Auth
 
   # TODO: Configure this function
   GenerateUploadUrl:
@@ -68,6 +79,8 @@ functions:
       - http:
           method: post
           path: todos/{todoId}/attachment
+          corst: true
+          authorizer: Auth
 
 resources:
   Resources:
