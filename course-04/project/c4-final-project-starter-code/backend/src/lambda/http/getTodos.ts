@@ -10,8 +10,6 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ')
   const jwtToken = split[1]
-
-  // Get the list of TODO items for the user
   const todoList = await getTodos(jwtToken);
 
   return {

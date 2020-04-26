@@ -1,14 +1,30 @@
 import 'source-map-support/register'
 
-import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+import * as middy from 'middy'
+import { cors } from 'middy/middlewares'
 
-//import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
+import { updateTodo } from '../../businessLogic/todos'
 
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  event
-  //const todoId = event.pathParameters.todoId
-  //const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  // Update a TODO item with the provided id using values in the "updatedTodo" object
+  const todoId = event.pathParameters.todoId
+  const updatedTodoRequest: UpdateTodoRequest = JSON.parse(event.body)
+  const authorization = event.headers.Authorization
+  const split = authorization.split(' ')
+  const jwtToken = split[1]
+  
+  await updateTodo(todoId, updatedTodoRequest, jwtToken)
 
-  // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
-  return undefined
-}
+  return {
+    statusCode: 200,
+    body: ""
+  }
+})
+
+handler.use(
+  cors({
+    credentials: true
+  })
+)
