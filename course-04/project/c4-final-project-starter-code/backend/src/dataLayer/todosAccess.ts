@@ -12,7 +12,7 @@ export class TodoAccess {
   }
 
   async getTodos(userId: string): Promise<TodoItem[]> {
-    logger.info('Getting all todos for user: ', userId)
+    logger.info('Getting all todos for user', { userId })
 
     const result = await this.dynamoDBClient.query({
       TableName: this.todosTable,
