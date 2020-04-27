@@ -15,7 +15,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
   const split = authorization.split(' ')
   const jwtToken = split[1]
   
-  await updateTodo(todoId, updatedTodoRequest, jwtToken)
+  updateTodo(todoId, updatedTodoRequest, jwtToken)
 
   return {
     statusCode: 200,

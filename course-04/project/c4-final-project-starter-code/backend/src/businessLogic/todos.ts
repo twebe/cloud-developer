@@ -14,13 +14,10 @@ export async function getTodos(jwtToken: string): Promise<TodoItem[]> {
     return todosAccess.getTodos(userId)
 }
 
-export async function createTodo(
-  createTodoRequest: CreateTodoRequest,
-  jwtToken: string
-): Promise<TodoItem> {
+export function createTodo(createTodoRequest: CreateTodoRequest, jwtToken: string): TodoItem {
   const todoId = uuid.v4()
   const userId = parseUserId(jwtToken)
-  return await todosAccess.createTodo({
+  return todosAccess.createTodo({
     todoId: todoId,
     userId: userId,
     name: createTodoRequest.name,
@@ -30,15 +27,17 @@ export async function createTodo(
   })
 }
 
-export async function updateTodo(
-    todoId: string,
-    updateTodoRequest: UpdateTodoRequest,
-    jwtToken: string) {
+export function updateTodo(todoId: string, updateTodoRequest: UpdateTodoRequest, jwtToken: string) {
   const userId = parseUserId(jwtToken)
   const todoUpdate: TodoUpdate = {
     name: updateTodoRequest.name,
     dueDate: updateTodoRequest.dueDate,
     done: updateTodoRequest.done
   }
-  await todosAccess.updateTodo(todoId, todoUpdate, userId)
+  todosAccess.updateTodo(todoId, todoUpdate, userId)
+}
+
+export async function deleteTodo(todoId: string, jwtToken: string) {
+  const userId = parseUserId(jwtToken)
+  todosAccess.deleteTodo(todoId, userId)
 }

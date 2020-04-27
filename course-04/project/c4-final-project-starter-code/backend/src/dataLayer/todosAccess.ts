@@ -26,22 +26,19 @@ export class TodoAccess {
     return items as TodoItem[]
   }
 
-  async createTodo(item: TodoItem): Promise<TodoItem> {
+  createTodo(item: TodoItem): TodoItem {
     logger.info('Creating new todo', { item })
-    await this.dynamoDBClient.put({
+    this.dynamoDBClient.put({
       TableName: this.todosTable,
       Item: item
-    }).promise()
+    }).send()
 
     return item
   }
 
-  async updateTodo(
-    todoId: string,
-    todoUpdate: TodoUpdate, 
-    userId: string) {
+  updateTodo(todoId: string, todoUpdate: TodoUpdate, userId: string) {
     logger.info('Updating todo', { todoId, todoUpdate, userId })
-    await this.dynamoDBClient.update({
+    this.dynamoDBClient.update({
       TableName: this.todosTable,
       Key: {
           "userId": userId,
@@ -54,7 +51,18 @@ export class TodoAccess {
         ":dueDate": todoUpdate.dueDate,
         ":done": todoUpdate.done
       }
-    }).promise();
+    }).send()
+  }
+
+  deleteTodo(todoId: string, userId: string) {
+    logger.info('Deleting todo', { todoId, userId })
+    this.dynamoDBClient.delete({
+      TableName: this.todosTable,
+      Key: {
+        "userId": userId,
+        "todoId": todoId
+      }
+    }).send()
   }
 
 }
