@@ -2,13 +2,17 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from '../models/TodoItem'
 import { createLogger } from '../utils/logger'
 import { TodoUpdate } from '../models/TodoUpdate'
+import * as AWS from 'aws-sdk'
 
 const logger = createLogger('auth')
 
 export class TodoAccess {
   constructor(
     private readonly dynamoDBClient: DocumentClient = new DocumentClient(),
-    private readonly todosTable = process.env.TODOS_TABLE) {
+    private readonly s3 = new AWS.S3({ signatureVersion: 'v4' }),
+    private readonly todosTable = process.env.TODOS_TABLE,
+    private readonly bucketName = process.env.IMAGES_S3_BUCKET,
+    private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION) {
   }
 
   async getTodos(userId: string): Promise<TodoItem[]> {
@@ -63,6 +67,28 @@ export class TodoAccess {
         "todoId": todoId
       }
     }).send()
+  }
+
+  generateUploadURL(todoId: string, userId: string): string {
+    logger.info('Updating todo with attachment URL', { todoId, userId })
+    this.dynamoDBClient.update({
+      TableName: this.todosTable,
+      Key: {
+          "userId": userId,
+          "todoId": todoId
+      },
+      UpdateExpression: "set attachmentUrl = :attachmentUrl",
+      ExpressionAttributeValues: {
+        ":attachmentUrl": `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
+      }
+    }).send()
+
+    logger.info('Generating upload URL', { todoId, userId })
+    return this.s3.getSignedUrl('putObject', {
+      Bucket: this.bucketName,
+      Key: todoId,
+      Expires: this.urlExpiration
+    })
   }
 
 }

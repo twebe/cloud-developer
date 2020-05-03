@@ -41,3 +41,8 @@ export async function deleteTodo(todoId: string, jwtToken: string) {
   const userId = parseUserId(jwtToken)
   todosAccess.deleteTodo(todoId, userId)
 }
+
+export function generateUploadURL(todoId: string, jwtToken: string): string {
+  const userId = parseUserId(jwtToken)
+  return todosAccess.generateUploadURL(todoId, userId)
+}
